@@ -44,6 +44,8 @@ beautifulsoup4==4.12.3
     # via
     #   llama-index-readers-file
     #   nbconvert
+black==24.10.0
+    # via -r requirements.in
 bleach==6.2.0
     # via nbconvert
 certifi==2024.12.14
@@ -59,6 +61,7 @@ charset-normalizer==3.4.0
     # via requests
 click==8.1.7
     # via
+    #   black
     #   llama-parse
     #   nltk
 comm==0.2.2
@@ -159,7 +162,9 @@ jinja2==3.1.4
 jiter==0.8.2
     # via openai
 joblib==1.4.2
-    # via nltk
+    # via
+    #   nltk
+    #   scikit-learn
 json5==0.10.0
     # via jupyterlab-server
 jsonpointer==3.0.0
@@ -293,7 +298,9 @@ multidict==6.1.0
     #   aiohttp
     #   yarl
 mypy-extensions==1.0.0
-    # via typing-inspect
+    # via
+    #   black
+    #   typing-inspect
 nbclient==0.10.1
     # via nbconvert
 nbconvert==7.16.4
@@ -330,6 +337,8 @@ numpy==2.2.0
     #   llama-index-core
     #   llama-index-legacy
     #   pandas
+    #   scikit-learn
+    #   scipy
 openai==1.57.4
     # via
     #   -r requirements.in
@@ -343,6 +352,7 @@ overrides==7.7.0
     # via jupyter-server
 packaging==24.2
     # via
+    #   black
     #   ipykernel
     #   jupyter-server
     #   jupyterlab
@@ -357,12 +367,16 @@ pandocfilters==1.5.1
     # via nbconvert
 parso==0.8.4
     # via jedi
+pathspec==0.12.1
+    # via black
 pexpect==4.9.0
     # via ipython
 pillow==11.0.0
     # via llama-index-core
 platformdirs==4.3.6
-    # via jupyter-core
+    # via
+    #   black
+    #   jupyter-core
 prometheus-client==0.21.1
     # via jupyter-server
 prompt-toolkit==3.0.48
@@ -456,6 +470,10 @@ rpds-py==0.22.3
     # via
     #   jsonschema
     #   referencing
+scikit-learn==1.6.0
+    # via -r requirements.in
+scipy==1.14.1
+    # via scikit-learn
 send2trash==1.8.3
     # via jupyter-server
 six==1.17.0
@@ -485,6 +503,8 @@ terminado==0.18.1
     # via
     #   jupyter-server
     #   jupyter-server-terminals
+threadpoolctl==3.5.0
+    # via scikit-learn
 tiktoken==0.8.0
     # via
     #   llama-index-core
