@@ -77,7 +77,7 @@ class RagHelperContext:
         )
         return tuple(QueryResult.from_doc(doc) for doc in similar_texts.objects)
 
-    def chat_response(self, query):
+    def chat_response(self, query, debug=False):
         similar_texts = self.meta_query(query)
         prompt = get_prompt_for_rag_query_results(results=similar_texts, query=query)
         response = self.openai_client.chat.completions.create(
@@ -91,7 +91,8 @@ class RagHelperContext:
             ],
             temperature=0,
         )
-        print(f"prompt: {prompt}\n\n\n")
+        if debug:
+            print(f"prompt: {prompt}\n\n\n")
         return response.choices[0].message.content
 
 
