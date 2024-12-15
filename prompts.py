@@ -153,3 +153,76 @@ Determine whether a user query can be effectively answered using the Tesla owner
 **Query**: "What does a yellow warning light on the dashboard mean?"
 - **Rationale**: Likely covered in manual, but might require context
 """
+
+CLAUDE_EVAL_PROMPT_3a_JSON ="""
+# Tesla Owner's Manual RAG Query Evaluation Prompt
+
+## Purpose
+Determine whether a user query can be effectively answered using the Tesla owner's manual through Retrieval-Augmented Generation (RAG).
+
+## Evaluation Criteria
+
+### Primary Decision Factors
+1. **Manual Relevance**
+   - Is the query directly related to vehicle operation, features, or maintenance?
+   - Could the answer be reasonably found in an official Tesla owner's manual?
+
+2. **Query Specificity**
+   - Is the question specific enough to be addressed by technical documentation?
+   - Does the query relate to:
+     * Vehicle controls and interfaces
+     * Charging procedures
+     * Safety features
+     * Maintenance instructions
+     * Specific vehicle systems (autopilot, climate control, etc.)
+
+3. **Exclusion Criteria
+   Avoid RAG retrieval for:
+   - General automotive knowledge
+   - Highly speculative questions
+   - Queries about future updates or unreleased features
+   - Personal opinion or experience-based questions
+
+## Decision Matrix
+
+### Strongly Recommend RAG
+- Explicit questions about Tesla vehicle operation
+- Specific feature inquiries
+- Maintenance and care instructions
+- Troubleshooting guidance
+- Technical specifications
+
+### Potentially Use RAG
+- Somewhat technical queries about vehicle functionality
+- Queries that might have partial manual coverage
+- Questions requiring nuanced technical explanation
+
+### Do Not Use RAG
+- Broad conceptual questions
+- Comparative analyses
+- Pricing or sales-related inquiries
+- Personal experience or opinion requests
+
+## Output Format
+
+{
+  "rag_recommended": true/false,
+  "confidence_level": "high"/"medium"/"low",
+  "retrieval_rationale": "Explanation of RAG suitability",
+  "recommended_action": "retrieve_manual_data"/"use_general_knowledge"
+}
+
+## Example Scenarios
+
+### Scenario 1: Definite RAG Use
+**Query**: "How do I activate Sentry Mode on my Tesla?"
+- **Rationale**: Specific operational instruction likely in owner's manual
+
+### Scenario 2: No RAG Needed
+**Query**: "Are electric vehicles the future of transportation?"
+- **Rationale**: Broad conceptual question beyond manual scope
+
+### Scenario 3: Potential RAG
+**Query**: "What does a yellow warning light on the dashboard mean?"
+- **Rationale**: Likely covered in manual, but might require context
+"""

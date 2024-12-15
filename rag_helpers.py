@@ -81,24 +81,50 @@ class RagHelperContext:
         )
         return tuple(QueryResult.from_doc(doc) for doc in similar_texts.objects)
 
-    def evaluate_query(self, query):
+    def evaluate_query(self, query) -> bool:
         response = self.openai_client.chat.completions.create(
             model=GPT_MINI,
             messages=[
                 {
                     "role": "system",
-                    "content": prompts.CLAUDE_EVAL_PROMPT_3,
+                    "content": prompts.CLAUDE_EVAL_PROMPT_3a_JSON,
                 },
                 {"role": "user", "content": query},
             ],
             temperature=0,
         )
-        structured_response = json.loads(response.choices[0].message.content)
+        
+        response_content = response.choices[0].message.content
         if self._debug:
-            print(f"query: {query}\nstructured_response: {structured_response}")
-        return structured_response['rag_recommended']
+            print(f"query: {query}\nstructured_response: {response_content}")
+        structured_response = json.loads(response_content)
+        return structured_response["rag_recommended"]
+
+    def simple_response(self, query):
+        response = self.openai_client.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant that answers questions based on the provided context.",
+                },
+                {"role": "user", "content": query},
+            ],
+            temperature=0,
+        )
+        return response.choices[0].message.content
 
     def chat_response(self, query):
+        use_rag = self.evaluate_query(query)
+        if not use_rag:
+            if self._debug:
+                print("will issue a simple response, not using RAG")
+            return self.simple_response(query)
+        if self._debug:
+            print("will issue a RAG based response")
+        return self.rag_response(query)
+
+    def rag_response(self, query):
         similar_texts = self.meta_query(query)
         prompt = get_prompt_for_rag_query_results(results=similar_texts, query=query)
         response = self.openai_client.chat.completions.create(
@@ -117,5 +143,5 @@ class RagHelperContext:
         return response.choices[0].message.content
 
 
-def get_rag_helper_context():
-    return RagHelperContext()
+def get_rag_helper_context(debug=False):
+    return RagHelperContext(debug=debug)
