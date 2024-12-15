@@ -2,8 +2,8 @@ import os
 from dataclasses import dataclass
 import openai
 from llama_index.embeddings.openai import OpenAIEmbedding
+from langsmith.wrappers import wrap_openai
 
-# from openai import OpenAI
 import weaviate
 from weaviate.classes.init import Auth
 from weaviate.classes.query import MetadataQuery
@@ -30,7 +30,7 @@ def get_weaviate_client():
 
 def get_openai_client():
     openai_api_key = os.environ["OPENAI_API_KEY"]
-    client = openai.Client(api_key=openai_api_key)
+    client = wrap_openai(openai.Client(api_key=openai_api_key))
     return client
 
 
