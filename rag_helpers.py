@@ -7,9 +7,11 @@ from langsmith.wrappers import wrap_openai
 import weaviate
 from weaviate.classes.init import Auth
 from weaviate.classes.query import MetadataQuery
+import prompts
 
 
 OPENAI_MODEL = "gpt-4o"
+GPT_MINI = "gpt-4o-mini"
 EMBEDDING_MODEL_NAME = "text-embedding-3-large"
 COLLECTION_NAME = "TeslaCybertruckOwnersManual"
 
@@ -76,6 +78,20 @@ class RagHelperContext:
             return_metadata=MetadataQuery(distance=True),
         )
         return tuple(QueryResult.from_doc(doc) for doc in similar_texts.objects)
+
+    def evaluate_query(self, query):
+        response = self.openai_client.chat.completions.create(
+            model=GPT_MINI,
+            messages=[
+                {
+                    "role": "system",
+                    "content": prompts.EVAL_PROMPT_3,
+                },
+                {"role": "user", "content": query},
+            ],
+            temperature=0,
+        )
+        return response.choices[0].message.content
 
     def chat_response(self, query, debug=False):
         similar_texts = self.meta_query(query)
