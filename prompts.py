@@ -2,7 +2,7 @@ EVAL_PROMPT_1 = """
 Given the user's question will retrieving data from the Tesla Owners Manual help provide an answer to the user's question. 
 response with either 'yes' or 'no'.""",
 
-EVAL_PROMPT_2 = """
+CLAUDE_EVAL_PROMPT_2 = """
 # RAG Query Evaluation Prompt
 
 You are an intelligent query evaluator tasked with determining whether a given user query requires data retrieval through Retrieval-Augmented Generation (RAG) to provide an accurate and comprehensive response.
@@ -79,7 +79,7 @@ Provide a structured response:
 """
 
 
-EVAL_PROMPT_3 ="""
+CLAUDE_EVAL_PROMPT_3 ="""
 # Tesla Owner's Manual RAG Query Evaluation Prompt
 
 ## Purpose

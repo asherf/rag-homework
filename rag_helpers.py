@@ -1,4 +1,5 @@
 import os
+import json
 from dataclasses import dataclass
 import openai
 from llama_index.embeddings.openai import OpenAIEmbedding
@@ -60,7 +61,8 @@ class QueryResult:
 
 
 class RagHelperContext:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self._debug = debug
         self.weaviate_client = get_weaviate_client()
         self.openai_client = get_openai_client()
         self.embedding_model = get_embedding_model()
@@ -85,15 +87,18 @@ class RagHelperContext:
             messages=[
                 {
                     "role": "system",
-                    "content": prompts.EVAL_PROMPT_3,
+                    "content": prompts.CLAUDE_EVAL_PROMPT_3,
                 },
                 {"role": "user", "content": query},
             ],
             temperature=0,
         )
-        return response.choices[0].message.content
+        structured_response = json.loads(response.choices[0].message.content)
+        if self._debug:
+            print(f"query: {query}\nstructured_response: {structured_response}")
+        return structured_response['rag_recommended']
 
-    def chat_response(self, query, debug=False):
+    def chat_response(self, query):
         similar_texts = self.meta_query(query)
         prompt = get_prompt_for_rag_query_results(results=similar_texts, query=query)
         response = self.openai_client.chat.completions.create(
@@ -107,7 +112,7 @@ class RagHelperContext:
             ],
             temperature=0,
         )
-        if debug:
+        if self._debug:
             print(f"prompt: {prompt}\n\n\n")
         return response.choices[0].message.content
 
