@@ -22,20 +22,17 @@ EXPERIMENT_PREFIX = "rag-tesla"
 
 @traceable
 def rag_support_agent(inputs: dict) -> dict:
-    query = inputs['messages'][0]['content']
+    query = inputs["messages"][0]["content"]
     response = ctx.rag_response(query)
-    return {
-        "message": {"role": "assistant", "content": response}
-    }
+    return {"message": {"role": "assistant", "content": response}}
 
 
 @traceable
-def correctness_evaluator(run:RunTree, example: Example) -> dict:
+def correctness_evaluator(run: RunTree, example: Example) -> dict:
     # Extract the original LeetCode problem from inputs
-    question = example.inputs['messages'][0]['content']
-    expected_answer = example.outputs['message']['content']
-    provided_answer = run.outputs['message']['content']
-    
+    question = example.inputs["messages"][0]["content"]
+    expected_answer = example.outputs["message"]["content"]
+    provided_answer = run.outputs["message"]["content"]
 
     # Rest of the evaluation logic remains the same
     evaluation_prompt = f"""
@@ -49,27 +46,24 @@ def correctness_evaluator(run:RunTree, example: Example) -> dict:
     {expected_answer}
     """
 
-    async def get_eval_completion():
-        response = await ctx.openai_client.chat.completions.create(
-            model=rh.MAIN_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": prompts.LLM_JUDGE_EVAL_PROMPT,
-                },
-                {"role": "user", "content": evaluation_prompt},
-            ],
-            temperature=0,
-        )
-        return response
+    response = ctx.openai_client.chat.completions.create(
+        model=rh.OPENAI_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": prompts.LLM_JUDGE_EVAL_PROMPT,
+            },
+            {"role": "user", "content": evaluation_prompt},
+        ],
+        temperature=0,
+    )
 
-    response = asyncio.run(get_eval_completion())
     try:
         json_output = json.loads(response.choices[0].message.content)
         return {
             "key": "score",
-            "score": json_output["total_score"],
-            "explanation": json_output,
+            "score": json_output["quality_score"],
+            "explanation": json_output['justification'],
         }
     except ValueError:
         return {
