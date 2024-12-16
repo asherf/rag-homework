@@ -1,15 +1,15 @@
-import os
 import json
+import os
 from dataclasses import dataclass
-import openai
-from llama_index.embeddings.openai import OpenAIEmbedding
-from langsmith.wrappers import wrap_openai
 
+import openai
 import weaviate
+from langsmith.wrappers import wrap_openai
+from llama_index.embeddings.openai import OpenAIEmbedding
 from weaviate.classes.init import Auth
 from weaviate.classes.query import MetadataQuery
-import prompts
 
+import prompts
 
 OPENAI_MODEL = "gpt-4o"
 GPT_MINI = "gpt-4o-mini"

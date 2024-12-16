@@ -1,28 +1,26 @@
 import asyncio
+import json
 import logging
 import random
-from langsmith import evaluate, traceable, Client
+from pathlib import Path
+from typing import Any, Dict, List
 
-
-from typing import List, Dict, Any
 from dotenv import load_dotenv
-from langsmith import Client
+from langsmith import Client, evaluate, traceable
+from llama_index.core import SimpleDirectoryReader
+from llama_index.core.node_parser import SentenceSplitter
+from llama_index.readers.file import FlatReader
 from openai import OpenAI
 from tqdm import tqdm
-import json
 
-from llama_index.core.node_parser import SentenceSplitter
-from llama_index.core import SimpleDirectoryReader
-from llama_index.readers.file import FlatReader
-
-import rag_helpers as rh
 import prompts
+import rag_helpers as rh
 
 load_dotenv()
 
 _logger = logging.getLogger(__name__)
 
-
+LOCAL_CACHE_FILE = Path("./.data/question_generation_cache.json")
 DATASET_NAME = "rag_evaluation_dataset"
 
 
@@ -98,9 +96,12 @@ def create_examples(ctx, nodes, num_chunks=10):
 
 def create_dataset(ctx):
     langsmith_client = Client()
-    langsmith_client
-    nodes = get_document_nodes()
-    examples = create_examples(ctx, nodes, num_chunks=10)
+    if LOCAL_CACHE_FILE.exists():
+        examples = json.loads(LOCAL_CACHE_FILE.read_text())
+    else:
+        nodes = get_document_nodes()
+        examples = create_examples(ctx, nodes, num_chunks=10)
+        LOCAL_CACHE_FILE.write_text(json.dumps(examples))
 
     for example in examples:
         langsmith_client.create_example(
