@@ -1,16 +1,12 @@
 import asyncio
 import json
 import logging
-import random
 from typing import Any, Dict, List
 
 from dotenv import load_dotenv
-from langsmith import Client, evaluate, traceable
-from llama_index.core import SimpleDirectoryReader
-from llama_index.core.node_parser import SentenceSplitter
-from llama_index.readers.file import FlatReader
-from openai import OpenAI
-from tqdm import tqdm
+from langsmith import evaluate, traceable
+from langsmith.schemas import Example
+from langsmith.run_trees import RunTree
 
 import prompts
 import rag_helpers as rh
@@ -26,17 +22,20 @@ EXPERIMENT_PREFIX = "rag-tesla"
 
 @traceable
 def rag_support_agent(inputs: dict) -> dict:
+    query = inputs['messages'][0]['content']
+    response = ctx.rag_response(query)
     return {
-        "message": {"role": "assistant", "content": ctx.rag_response(inputs["query"])}
+        "message": {"role": "assistant", "content": response}
     }
 
 
 @traceable
-def correctness_evaluator(run, example) -> dict:
+def correctness_evaluator(run:RunTree, example: Example) -> dict:
     # Extract the original LeetCode problem from inputs
-    question = run.inputs
-    provided_answer = run.outputs
-    expected_answer = example
+    question = example.inputs['messages'][0]['content']
+    expected_answer = example.outputs['message']['content']
+    provided_answer = run.outputs['message']['content']
+    
 
     # Rest of the evaluation logic remains the same
     evaluation_prompt = f"""
@@ -83,9 +82,11 @@ def correctness_evaluator(run, example) -> dict:
 evaluators = [correctness_evaluator]
 
 
-results = evaluate(
-    rag_support_agent,
-    data=DATASET_NAME,
-    evaluators=evaluators,
-    experiment_prefix=EXPERIMENT_PREFIX,
-)
+if __name__ == "__main__":
+    results = evaluate(
+        rag_support_agent,
+        data=DATASET_NAME,
+        evaluators=evaluators,
+        experiment_prefix=EXPERIMENT_PREFIX,
+    )
+    print(results)
