@@ -97,12 +97,16 @@ def create_examples(ctx, nodes, num_chunks=10):
 def create_dataset(ctx):
     langsmith_client = Client()
     if LOCAL_CACHE_FILE.exists():
+        _logger.info("Loading cached examples")
         examples = json.loads(LOCAL_CACHE_FILE.read_text())
     else:
+        _logger.info("Generating examples")
         nodes = get_document_nodes()
         examples = create_examples(ctx, nodes, num_chunks=10)
+        _logger.info(f"Generated {len(examples)} examples, saving to cache")
         LOCAL_CACHE_FILE.write_text(json.dumps(examples))
 
+    _logger.info(f"Uploading examples dataset: {DATASET_NAME}")
     for example in examples:
         langsmith_client.create_example(
             dataset_name=DATASET_NAME,
@@ -113,5 +117,6 @@ def create_dataset(ctx):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     ctx = rh.get_rag_helper_context()
     create_dataset(ctx)
