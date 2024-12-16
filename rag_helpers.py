@@ -15,6 +15,7 @@ OPENAI_MODEL = "gpt-4o"
 GPT_MINI = "gpt-4o-mini"
 EMBEDDING_MODEL_NAME = "text-embedding-3-large"
 COLLECTION_NAME = "TeslaCybertruckOwnersManual"
+TESLA_DOC = "./.data/Tesla Cybertruck Owners Manual.md"
 
 
 def get_embedding_model():
@@ -93,7 +94,7 @@ class RagHelperContext:
             ],
             temperature=0,
         )
-        
+
         response_content = response.choices[0].message.content
         if self._debug:
             print(f"query: {query}\nstructured_response: {response_content}")
@@ -124,18 +125,21 @@ class RagHelperContext:
             print("will issue a RAG based response")
         return self.rag_response(query)
 
+    def get_rag_prompt(self, prompt):
+        return [
+            {
+                "role": "system",
+                "content": prompts.CONTEXT_PROMPT,
+            },
+            {"role": "user", "content": prompt},
+        ]
+
     def rag_response(self, query):
         similar_texts = self.meta_query(query)
         prompt = get_prompt_for_rag_query_results(results=similar_texts, query=query)
         response = self.openai_client.chat.completions.create(
             model=OPENAI_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant that answers questions based on the provided context.",
-                },
-                {"role": "user", "content": prompt},
-            ],
+            messages=self.get_rag_prompt(prompt),
             temperature=0,
         )
         if self._debug:
