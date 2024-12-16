@@ -21,7 +21,7 @@ load_dotenv()
 _logger = logging.getLogger(__name__)
 
 LOCAL_CACHE_FILE = Path("./.data/question_generation_cache.json")
-DATASET_NAME = "rag_evaluation_dataset"
+DATASET_NAME = "rag-tesla-questions-dataset"
 
 
 def get_document_nodes():
@@ -110,8 +110,8 @@ def create_dataset(ctx):
     for example in examples:
         langsmith_client.create_example(
             dataset_name=DATASET_NAME,
-            inputs={"messages": {"role": "user", "content": example["question"]}},
-            outputs={"messages": {"role": "assistant", "content": example["answer"]}},
+            inputs={"messages": [{"role": "user", "content": example["question"]}]},
+            outputs={"message": {"role": "assistant", "content": example["answer"]}},
             metadata=example["metadata"],
         )
 
